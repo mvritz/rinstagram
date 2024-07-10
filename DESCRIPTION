@@ -1,0 +1,13 @@
+Package: rinstagram
+Title: An Instagram Crawler for R
+Version: 1.0.0
+Description: An Instagram crawler for R that allows you to scrape user accounts to get information on posts, followers, and more.
+License: use_mit_license()
+Encoding: UTF-8
+Imports:
+    httr,
+    jsonlite,
+    openssl,
+    sodium,
+    base64enc
+RoxygenNote: 7.3.2
