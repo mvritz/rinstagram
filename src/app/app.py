@@ -11,6 +11,10 @@ from nacl.public import PublicKey, SealedBox
 
 app = flask.Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def index() -> str:
+    return "github.com/mvritz"
+
 
 @app.route("/encrypt", methods=["POST"])
 def encrypt() -> str:
