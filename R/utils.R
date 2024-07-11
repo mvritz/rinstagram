@@ -5,9 +5,6 @@
 #' A function to retrieve a random User-Agent string
 #'
 #' @return A random User-Agent string
-#'
-#' @examples
-#' my_random_user_agent <- get_random_user_agent()
 get_random_user_agent <- function() {
   user_agents <- c(
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
@@ -35,59 +32,34 @@ get_random_user_agent <- function() {
 #' A function to generate a random CSRF token for Instagram requests
 #'
 #' @return A random CSRF token
-#'
-#' @examples
-#' my_csrf_token <- generate_csrf_token()
 generate_csrf_token <- function() {
   chars <- c(letters, LETTERS, 0:9)
   paste(sample(chars, 32, replace = TRUE), collapse = "")
 }
 
-#' CSV saving function
+
+#' Save Instagram profile data to CSV
 #'
 #' A function to save Instagram profile data to a CSV file
 #'
-#' @param profiles A list of InstagramProfileRaw objects
-#' @param filepath The file path to save the CSV file to
-#'
-#' @examples
-#' save_profiles_to_csv(profiles, "/path/to/data.csv")
-#' save_profiles_to_csv(profiles)
-save_profiles_to_csv <- function(profiles, filepath = "instagram_profiles.csv") {
-  if (is.null(profiles)) {
-    stop("No profiles data available to save.")
+#' @param instagramProfile An InstagramProfile object
+#' @param filePath The file path to save the data to
+saveInstagramProfile <- function(instagramProfile, filePath = "data/profiles.csv") {
+  headers <- c("username", "follower_count", "following_count", "posts_count", "posts_likes", "posts_comments", "posts_dates")
+  if (!file.exists(filePath)) {
+    write.csv(x = setNames(data.frame(matrix(ncol = length(headers), nrow = 0)), headers), file = filePath, row.names = FALSE)
   }
-  write.csv(profiles, file = filepath, row.names = FALSE)
+
+  data <- c(
+    instagramProfile@username,
+    instagramProfile@follower_count,
+    instagramProfile@following_count,
+    instagramProfile@posts_count,
+    if (length(instagramProfile@posts_likes) > 0) paste(instagramProfile@posts_likes, collapse = "; ") else NA,
+    if (length(instagramProfile@posts_comments) > 0) paste(instagramProfile@posts_comments, collapse = "; ") else NA,
+    if (length(instagramProfile@posts_dates) > 0) paste(instagramProfile@posts_dates, collapse = "; ") else NA
+  )
+
+  df <- setNames(data.frame(t(data), stringsAsFactors = FALSE), headers)
+  write.table(df, file = filePath, append = TRUE, sep = ",", col.names = FALSE, row.names = FALSE, quote = TRUE)
 }
-
-encrypt_password_v10 <- function(key_id, pub_key, password) {
-  # Generate a random key for encryption (XSalsa20)
-  key <- random(32)
-
-  # Generate a nonce for encryption (XSalsa20 requires 24-byte nonce)
-  nonce <- random(24)
-
-  # Encrypt the password with the nonce and key using sodium's simple_encrypt
-  encrypted_password <- simple_encrypt(charToRaw(password), key, nonce)
-
-  # Decode the hexadecimal public key into binary
-  pub_key_bytes <- hex2bin(pub_key)
-
-  # Encrypt the AES key using the public key
-  encrypted_key <- crypto_box_seal(key, pub_key_bytes)
-
-  # Construct the final encrypted payload
-  encrypted <- c(as.raw(1),
-                 as.raw(as.integer(key_id)),
-                 as.raw(length(encrypted_key)),
-                 encrypted_key,
-                 nonce,
-                 encrypted_password)
-
-  # Encode the final encrypted payload in base64
-  encrypted_base64 <- base64encode(encrypted)
-
-  return(encrypted_base64)
-}
-
-encrypt_password_v10("159", "51034bde7df94d0c925f799a9297fc53eaa1369b50d09fa17bef9da2364ca328", "Rindenmulch")

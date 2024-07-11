@@ -12,6 +12,3 @@ A random CSRF token
 \description{
 A function to generate a random CSRF token for Instagram requests
 }
-\examples{
-my_csrf_token <- generate_csrf_token()
-}

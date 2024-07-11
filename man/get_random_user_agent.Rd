@@ -12,6 +12,3 @@ A random User-Agent string
 \description{
 A function to retrieve a random User-Agent string
 }
-\examples{
-my_random_user_agent <- get_random_user_agent()
-}
