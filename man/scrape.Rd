@@ -12,12 +12,12 @@ scrape(usernames, file_path)
 \item{file_path}{The optional file path to save the scraped data to (default: "data/profiles.csv")}
 }
 \value{
-A data frame containing the scraped data or NULL if an error occurred
+A data frame containing the scraped data (username, followers, following, post count) or NULL if an error occurred
 }
 \description{
 A function to scrape Instagram profiles without a session. You can use this function to scrape public profiles
 If you get rate limited, you can try using the `lscrape` function which is more robust as it is using a profile for scraping
 }
 \examples{
-scraped_data <- scrape(c("osamason", "praiseche"), "data/profiles.csv")
+scraped_data <- scrape(c("osamason", "praiseche"), "path/to/profiles.csv")
 }

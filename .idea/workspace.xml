@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a6f51da0-9804-455b-bbdd-a06b4c342b86" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/rinstagram.Rproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,7 +80,8 @@
       <workItem from="1720704219302" duration="14144000" />
       <workItem from="1720733392713" duration="15000" />
       <workItem from="1720733623685" duration="9000" />
-      <workItem from="1720733881301" duration="1253000" />
+      <workItem from="1720733881301" duration="1288000" />
+      <workItem from="1720735175552" duration="23000" />
     </task>
     <servers />
   </component>
