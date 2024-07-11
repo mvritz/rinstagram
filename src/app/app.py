@@ -6,10 +6,12 @@ import time
 import flask
 from Cryptodome import Random
 from Cryptodome.Cipher import AES
+from flask import jsonify, Response
 from flask import request
 from nacl.public import PublicKey, SealedBox
 
 app = flask.Flask(__name__)
+
 
 @app.route("/", methods=["GET"])
 def index() -> str:
@@ -17,8 +19,10 @@ def index() -> str:
 
 
 @app.route("/encrypt", methods=["POST"])
-def encrypt() -> str:
+def encrypt() -> Response:
     data = request.get_json()
+
+    print(data)
 
     key_id: str = data["key_id"]
     pub_key: str = data["pub_key"]
@@ -48,7 +52,7 @@ def encrypt() -> str:
     )
     encrypted = base64.b64encode(encrypted).decode("utf-8")
 
-    return encrypted
+    return jsonify({"encrypted": encrypted})
 
 
 if __name__ == "__main__":
