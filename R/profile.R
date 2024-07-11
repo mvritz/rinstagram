@@ -16,6 +16,7 @@ web_profile_request <- function(instagram_session, username) {
     `User-Agent` = instagram_session@user_agent,
     `Accept` = "*/*",
     `Accept-Language` = "en-US,en;q=0.5",
+    `Accept-Encoding` = "gzip, deflate, br",
     `X-CSRFToken` = instagram_session@csrf,
     `X-IG-App-ID` = "936619743392459",
     `X-ASBD-ID` = "129477",

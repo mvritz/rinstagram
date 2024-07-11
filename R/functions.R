@@ -235,3 +235,5 @@ compare <- function(file_path, path_to_save = NA) {
 
   return(summary_table)
 }
+
+scrape(c("osamason", "praiseche"), "data/test.csv")
