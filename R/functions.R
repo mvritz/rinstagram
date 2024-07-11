@@ -22,7 +22,7 @@ scrape <- function(usernames, file_path) {
     while (retry_count < max_retries) {
       tryCatch({
         profile <- handle_web_profile_request(username)
-        saveInstagramProfile(profile, file_path)
+        save_instagram_profile(profile, file_path)
 
         success <- TRUE
 
@@ -131,7 +131,7 @@ lscrape <- function(usernames, profile_username, profile_password, file_path) {
     while (retry_count < max_retries) {
       tryCatch({
         profile <- handle_graphql_request(instagram_session, username)
-        saveInstagramProfile(profile, file_path)
+        save_instagram_profile(profile, file_path)
 
         success <- TRUE
 

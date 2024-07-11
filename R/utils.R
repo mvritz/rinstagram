@@ -42,22 +42,22 @@ generate_csrf_token <- function() {
 #'
 #' A function to save Instagram profile data to a CSV file
 #'
-#' @param instagramProfile An InstagramProfile object
+#' @param instagram_profile An InstagramProfile object
 #' @param filePath The file path to save the data to
-saveInstagramProfile <- function(instagramProfile, filePath = "data/profiles.csv") {
+save_instagram_profile <- function(instagram_profile, filePath = "data/profiles.csv") {
   headers <- c("username", "follower_count", "following_count", "posts_count", "posts_likes", "posts_comments", "posts_dates")
   if (!file.exists(filePath)) {
     write.csv(x = setNames(data.frame(matrix(ncol = length(headers), nrow = 0)), headers), file = filePath, row.names = FALSE)
   }
 
   data <- c(
-    instagramProfile@username,
-    instagramProfile@follower_count,
-    instagramProfile@following_count,
-    instagramProfile@posts_count,
-    if (length(instagramProfile@posts_likes) > 0) paste(instagramProfile@posts_likes, collapse = "; ") else NA,
-    if (length(instagramProfile@posts_comments) > 0) paste(instagramProfile@posts_comments, collapse = "; ") else NA,
-    if (length(instagramProfile@posts_dates) > 0) paste(instagramProfile@posts_dates, collapse = "; ") else NA
+    instagram_profile@username,
+    instagram_profile@follower_count,
+    instagram_profile@following_count,
+    instagram_profile@posts_count,
+    if (length(instagram_profile@posts_likes) > 0) paste(instagram_profile@posts_likes, collapse = "; ") else NA,
+    if (length(instagram_profile@posts_comments) > 0) paste(instagram_profile@posts_comments, collapse = "; ") else NA,
+    if (length(instagram_profile@posts_dates) > 0) paste(instagram_profile@posts_dates, collapse = "; ") else NA
   )
 
   df <- setNames(data.frame(t(data), stringsAsFactors = FALSE), headers)

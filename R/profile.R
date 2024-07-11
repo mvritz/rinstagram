@@ -36,12 +36,7 @@ web_profile_request <- function(instagram_session, username) {
 
   url <- "https://www.instagram.com/api/v1/users/web_profile_info/"
 
-  print(url)
-  message(url)
-  cat(url)
   res <- httr::GET(url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies))
-  print(res)
-  status_code(res)
   data <- jsonlite::fromJSON(httr::content(res, as = "text"))
 
   return(data)
@@ -54,10 +49,6 @@ web_profile_request <- function(instagram_session, username) {
 #' @param username The username of the Instagram profile to fetch
 #' @return An InstagramProfileWebProfile object
 handle_web_profile_request <- function(username) {
-  cat(username)
-  print(username)
-  message(username)
-
   user_agent <- get_random_user_agent()
   csrf <- generate_csrf_token()
 
