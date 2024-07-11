@@ -16,7 +16,6 @@ web_profile_request <- function(instagram_session, username) {
     `User-Agent` = instagram_session@user_agent,
     `Accept` = "*/*",
     `Accept-Language` = "en-US,en;q=0.5",
-    `Accept-Encoding` = "gzip, deflate, br",
     `X-CSRFToken` = instagram_session@csrf,
     `X-IG-App-ID` = "936619743392459",
     `X-ASBD-ID` = "129477",
@@ -40,7 +39,7 @@ web_profile_request <- function(instagram_session, username) {
   print(url)
   message(url)
   cat(url)
-  res <- httr::GET(url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies), config = httr::encoding("gzip, deflate"), verbose())
+  res <- httr::GET(url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies), verbose())
   print(res)
   status_code(res)
   data <- jsonlite::fromJSON(httr::content(res, as = "text"))
