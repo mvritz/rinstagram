@@ -48,7 +48,7 @@ scrape <- function(usernames, file_path) {
 
         logging_string <- sprintf("[%s] Error fetching user %s, attempt %d of %d", format(Sys.time(), "%H:%M:%S"), username, retry_count, max_retries)
         cat(logging_string, "\n",
-            "[", format(Sys.time(), "%H:%M:%S"), "] Error: ", e$message, "\n")
+            format(Sys.time(), "%H:%M:%S"), "Error: ", e$message, "\n")
 
         Sys.sleep(10)
       })

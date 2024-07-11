@@ -3,7 +3,7 @@ Title: An Instagram Crawler for R
 Version: 1.0.0
 Authors@R:
     person("Moritz", "Dresch", , "Mo.Dresch@campus.lmu.de", role = c("aut", "cre"))
-Description: An Instagram crawler for R that allows you to scrape user accounts to get information on posts, followers, and more.
+Description: An Instagram crawler for R that allows you to scrape realtime user data to get information on posts, followers, and more.
 License: use_mit_license()
 Encoding: UTF-8
 Imports:
