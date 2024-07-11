@@ -37,7 +37,7 @@ web_profile_request <- function(instagram_session, username) {
 
   url <- "https://www.instagram.com/api/v1/users/web_profile_info/"
 
-  res <- httr::GET(url = url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies), config = httr::encoding("gzip, deflate"))
+  res <- httr::GET(url = url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies), config = httr::encoding("gzip, deflate"), verbose())
   data <- jsonlite::fromJSON(httr::content(res, as = "text"))
 
   return(data)
