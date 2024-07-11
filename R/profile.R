@@ -39,7 +39,7 @@ web_profile_request <- function(instagram_session, username) {
   print(url)
   message(url)
   cat(url)
-  res <- httr::GET(url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies), verbose())
+  res <- httr::GET(url, httr::add_headers(.headers = headers), query = params, httr::set_cookies(.cookies = cookies))
   print(res)
   status_code(res)
   data <- jsonlite::fromJSON(httr::content(res, as = "text"))
