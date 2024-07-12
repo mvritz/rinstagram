@@ -1,7 +1,5 @@
 # Rinstagram 📸
 
-[![R-CMD-check](
-
 Rinstagram is an R package which allows you to work with real time user data from Instagram.
 
 - [Installation](#installation)
