@@ -19,8 +19,7 @@
 
 # rinstagram 📸
 
-rinstagram is an R package which allows you to work with real time user data from Instagram.
-
+- [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
     - [scrape](#scrape)
@@ -38,6 +37,13 @@ rinstagram is an R package which allows you to work with real time user data fro
 - [Contribution](#contribution)
 - [License](#license)
 - [Disclaimer](#disclaimer)
+
+# Introduction 📝
+
+rinstagram is an R package which allows you to work with real time Instagram data. It provides you with the ability to
+scrape Instagram user data so you can analyze it in R. This package was built for my university project in Advanced
+Statistical Software at _Ludwig-Maximilians-University Munich_. To read more about the motivation about this software
+read [this PDF](assets/motivation.pdf).
 
 # Installation 🖥️
 
