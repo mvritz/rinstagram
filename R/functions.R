@@ -23,8 +23,15 @@ scrape <- function(usernames, file_path = "data/profiles.csv") {
     while (retry_count < max_retries & !success) {
       tryCatch({
         profile <- handle_web_profile_request(username)
-
         save_instagram_profile(profile, file_path)
+
+        extracted_data <- data.frame(
+          username = profile@username,
+          follower_count = profile@follower_count,
+          following_count = profile@following_count,
+          posts_count = profile@posts_count
+        )
+
         success <- TRUE
         logging_string <- sprintf("[%s] Successfully scraped user %s", format(Sys.time(), "%H:%M:%S"), username)
         cat(logging_string, "\n")
@@ -33,6 +40,7 @@ scrape <- function(usernames, file_path = "data/profiles.csv") {
           Sys.sleep(runif(1, 3, 7))
         }
 
+        return(extracted_data)
       }, error = function(e) {
         retry_count <<- retry_count + 1
         logging_string <- sprintf("[%s] Error fetching user %s, attempt %d of %d\nError: %s",
@@ -143,6 +151,16 @@ lscrape <- function(usernames, profile_username, profile_password, file_path) {
         profile <- handle_graphql_request(instagram_session, username)
         save_instagram_profile(profile, file_path)
 
+        extracted_data <- data.frame(
+          username = profile@username,
+          follower_count = profile@follower_count,
+          following_count = profile@following_count,
+          posts_count = profile@posts_count,
+          posts_likes = if (length(profile@posts_likes) > 0) paste(profile@posts_likes, collapse = "; ") else NA,
+          posts_comments = if (length(profile@posts_comments) > 0) paste(profile@posts_comments, collapse = "; ") else NA,
+          posts_dates = if (length(profile@posts_dates) > 0) paste(profile@posts_dates, collapse = "; ") else NA
+        )
+
         success <- TRUE
 
         logging_string <- sprintf("[%s] Successfully scraped user %s", format(Sys.time(), "%H:%M:%S"), username)
@@ -152,7 +170,7 @@ lscrape <- function(usernames, profile_username, profile_password, file_path) {
           Sys.sleep(runif(1, 3, 7))
         }
 
-        return(str(profile))
+        return(extracted_data)
       }, error = function(e) {
         retry_count <- retry_count + 1
         if (retry_count == max_retries) {
