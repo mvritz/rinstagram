@@ -1,12 +1,5 @@
 # R/functions.R
 
-source("R/types.R")
-source("R/profile.R")
-source("R/login.R")
-source("R/utils.R")
-library("httr")
-
-
 #' Scrape Instagram profiles (without session)
 #'
 #' A function to scrape Instagram profiles without a session. You can use this function to scrape public profiles
@@ -252,5 +245,3 @@ compare <- function(file_path, path_to_save = NA) {
 
   return(summary_table)
 }
-
-scrape(c("osamason", "instagram"))
