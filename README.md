@@ -1,4 +1,6 @@
-# Rinstagram
+# Rinstagram 📸
+
+[![R-CMD-check](
 
 Rinstagram is an R package which allows you to work with real time user data from Instagram.
 
@@ -20,7 +22,7 @@ Rinstagram is an R package which allows you to work with real time user data fro
 - [License](#license)
 - [Disclaimer](#disclaimer)
 
-# Installation
+# Installation 🖥️
 
 You can simply install the package from github using the following command:
 
@@ -28,7 +30,7 @@ You can simply install the package from github using the following command:
 remotes::install_github("mvritz/rinstagram")
 ```
 
-# Usage
+# Usage 📊
 
 The package has 2 main functions: `scrape` and `lscrape`. There is also a third function for comparing your data
 called `compare`.
@@ -171,16 +173,16 @@ the follower to following ratio.
 The function works by reading the data from the csv file and calculating the average likes and comments per post and the
 follower to following ratio.
 
-# Contribution
+# Contribution 🤝
 
 If you want to contribute to the package feel free to open a pull request.
 
-# License
+# License 📜
 
 MIT License:
 https://opensource.org/licenses/MIT
 
-# Disclaimer
+# Disclaimer 🚨
 
 This package is for educational purposes only. I am not responsible for any misuse of the package. Use at your own risk.
 The package is not affiliated with Instagram or Facebook. The package is not an official API for Instagram.
