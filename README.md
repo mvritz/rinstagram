@@ -1,6 +1,25 @@
-# Rinstagram 📸
+<!-- Please be careful editing the below HTML, as GitHub is quite finicky with anything that looks like an HTML tag in GitHub Flavored Markdown. -->
+<p align="center">
+  <img src="assets/banner.png" alt="Banner">
+</p>
+<p align="center">
+  <b>R package for scraping Instagram user data</b>
+</p>
+<p align="center">
+  <a href="https://github.com/mvritz/rinstagram/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=purple" alt="License Badge">
+  </a>
+  <a href="https://github.com/mvrtiz/rinstagram/blob/master/CHANGELOG.md">
+    <img src="https://img.shields.io/badge/view_-changelog_-purple" alt="Changelog Badge">
+  </a>
+  <a href="https://github.com/mvritz.rinstagram/releases">
+    <img src="https://img.shields.io/badge/R--CMD--check_-passing_-purple" alt="Version Badge">
+  </a>
+</p>
 
-Rinstagram is an R package which allows you to work with real time user data from Instagram.
+# rinstagram 📸
+
+rinstagram is an R package which allows you to work with real time user data from Instagram.
 
 - [Installation](#installation)
 - [Usage](#usage)
