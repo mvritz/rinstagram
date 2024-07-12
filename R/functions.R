@@ -25,14 +25,14 @@ scrape <- function(usernames, file_path = "data/profiles.csv") {
     retry_count <- 0
     max_retries <- 3
     success <- FALSE
+    profile <- NULL
 
-    while (retry_count < max_retries) {
+    while (retry_count < max_retries & !success) {
       tryCatch({
         profile <- handle_web_profile_request(username)
         save_instagram_profile(profile, file_path)
 
         success <- TRUE
-
         logging_string <- sprintf("[%s] Successfully scraped user %s", format(Sys.time(), "%H:%M:%S"), username)
         cat(logging_string, "\n")
 
@@ -40,38 +40,37 @@ scrape <- function(usernames, file_path = "data/profiles.csv") {
           Sys.sleep(runif(1, 3, 7))
         }
 
-        return(str(profile))
       }, error = function(e) {
-        if (retry_count == max_retries) {
-          cat("\n\n Error fetching user after", max_retries, "attempts:", username, "\n",
+        retry_count <<- retry_count + 1
+        logging_string <- sprintf("[%s] Error fetching user %s, attempt %d of %d\nError: %s",
+                                  format(Sys.time(), "%H:%M:%S"), username, retry_count, max_retries, e$message)
+        cat(logging_string, "\n")
+
+        if (retry_count >= max_retries) {
+          cat("\n\nError fetching user after", max_retries, "attempts:", username, "\n",
               "This might be due to rate limits. Your data is saved in the CSV file.\n",
               "You might want to try using the function `lscrape` which is more robust.\n",
               "Error: ", e$message, "\n")
-
-          write.csv(profiles, file_path)
           return(NULL)
         }
-
-        retry_count <- retry_count + 1
-        logging_string <- sprintf("[%s] Error fetching user %s, attempt %d of %d", format(Sys.time(), "%H:%M:%S"), username, retry_count, max_retries)
-        cat(logging_string, "\n",
-            format(Sys.time(), "%H:%M:%S"), "Error: ", e$message, "\n")
 
         Sys.sleep(10)
       })
     }
 
-    if (!success) NULL
+    if (success) return(profile) else return(NULL)
   })
 
   profiles_data <- do.call(rbind, profiles)
-  if (is.data.frame(profiles_data)) write.csv(profiles_data, file_path)
+  if (!is.null(profiles_data)) {
+    write.csv(profiles_data, file_path)
+  }
 
   logging_string <- sprintf("[%s] Job is done. All available data has been saved to %s", format(Sys.time(), "%H:%M:%S"), file_path)
   cat(logging_string, "\n")
+
   return(profiles_data)
 }
-
 
 #' Scrape Instagram profiles (with session) [lscrape -> logged in scraping]
 #'
@@ -115,22 +114,22 @@ lscrape <- function(usernames, profile_username, profile_password, file_path) {
   session_id <- ifelse("sessionid" %in% login_data$cookies$name,
                        login_data$cookies[login_data$cookies$name == "sessionid", "value"],
                        NA)
-  
+
   if (is.na(session_id)) {
     logging_string <- sprintf("[%s] No session ID found during an issue with your login. Scraping is not available with this function.", format(Sys.time(), "%H:%M:%S"))
     cat(logging_string, "\n")
 
     return(NULL)
   }
-  
+
   user_id <- ifelse("ds_user_id" %in% login_data$cookies$name,
-                       login_data$cookies[login_data$cookies$name == "ds_user_id", "value"],
-                       NA)
-  
+                    login_data$cookies[login_data$cookies$name == "ds_user_id", "value"],
+                    NA)
+
   if (is.na(user_id)) {
     logging_string <- sprintf("[%s] No user ID found during an issue with your login. Scraping is not available with this function.", format(Sys.time(), "%H:%M:%S"))
     cat(logging_string, "\n")
-    
+
     return(NULL)
   }
 
@@ -140,7 +139,7 @@ lscrape <- function(usernames, profile_username, profile_password, file_path) {
                            session_id = session_id,
                            user_id = user_id
   )
-  
+
   profiles <- lapply(usernames, function(username) {
     retry_count <- 0
     max_retries <- 3
