@@ -1,7 +1,7 @@
 # R/functions.R
 
 source("R/types.R")
-source("R/graphql.R")
+source("R/profile.R")
 source("R/login.R")
 source("R/utils.R")
 library("httr")
@@ -30,8 +30,8 @@ scrape <- function(usernames, file_path = "data/profiles.csv") {
     while (retry_count < max_retries & !success) {
       tryCatch({
         profile <- handle_web_profile_request(username)
-        save_instagram_profile(profile, file_path)
 
+        save_instagram_profile(profile, file_path)
         success <- TRUE
         logging_string <- sprintf("[%s] Successfully scraped user %s", format(Sys.time(), "%H:%M:%S"), username)
         cat(logging_string, "\n")
@@ -252,3 +252,5 @@ compare <- function(file_path, path_to_save = NA) {
 
   return(summary_table)
 }
+
+scrape(c("osamason", "instagram"))
