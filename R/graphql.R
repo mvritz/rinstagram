@@ -2,17 +2,17 @@
 
 user_id_request <- function(instagram_session, username) {
   cookies <- c(
-    `csrftoken` = instagram_session$csrf,
-    `ds_user_id` = instagram_session$user_id,
-    `sessionid` = instagram_session$session_id
+    `csrftoken` = instagram_session@csrf,
+    `ds_user_id` = instagram_session@user_id,
+    `sessionid` = instagram_session@session_id
   )
 
   headers <- c(
-    `User-Agent` = instagram_session$user_agent,
+    `User-Agent` = instagram_session@user_agent,
     `Accept` = "*/*",
     `Accept-Language` = "en-US,en;q=0.5",
     `Accept-Encoding` = "gzip, deflate, br",
-    `X-CSRFToken` = instagram_session$csrf,
+    `X-CSRFToken` = instagram_session@csrf,
     `X-IG-App-ID` = "936619743392459",
     `X-ASBD-ID` = "129477",
     `X-IG-WWW-Claim` = "hmac.AR26qQ1NK_DMlx-PR_o_BNQ_OaSVyiL7y3dCxgTox0sVi_6D",
