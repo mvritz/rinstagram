@@ -252,5 +252,3 @@ compare <- function(file_path, path_to_save = NA) {
 
   return(summary_table)
 }
-
-lscrape(c("osamason"), "whoisuionknow", "EmDi1234")
