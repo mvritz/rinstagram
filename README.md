@@ -12,9 +12,7 @@
   <a href="https://github.com/mvrtiz/rinstagram/blob/master/CHANGELOG.md">
     <img src="https://img.shields.io/badge/view_-changelog_-purple" alt="Changelog Badge">
   </a>
-  <a href="https://github.com/mvritz.rinstagram/releases">
-    <img src="https://img.shields.io/badge/R--CMD--check_-passing_-purple" alt="Version Badge">
-  </a>
+  <img src="https://img.shields.io/badge/R--CMD--check_-passing_-purple" alt="Version Badge">
 </p>
 
 # rinstagram 📸
