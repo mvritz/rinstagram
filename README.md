@@ -104,7 +104,7 @@ the reason why the function is limited to a small number of users at once.
 This function allows you to get the data from a list of users by using a session ID. That means that you have to use
 your own account to scrape the data. *
 *_I highly recommend using a dummy account for this and not your own account to avoid getting flagged._**
-To use your own accuont and so a session ID is useful if you want to scrape a lot of users at once.
+Using your own account (= scraping with a session ID) is useful if you want to scrape a lot of users at once.
 You can use it like this:
 
 ```R
