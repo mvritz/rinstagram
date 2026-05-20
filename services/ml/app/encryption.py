@@ -18,11 +18,8 @@ def encrypt_instagram_password(key_id: str, pub_key: str, password: str) -> str:
     """
     Encrypt a plaintext password using Instagram's v10 envelope scheme.
 
-    The scheme combines:
-    - A 256-bit AES-GCM key (randomly generated per request)
-    - The current UNIX timestamp as AAD
-    - NaCl SealedBox to encrypt the AES key with Instagram's RSA public key
-    - Base64-encoded concatenation of all components
+    Combines AES-256-GCM (random key per request) with NaCl SealedBox to
+    encrypt the AES key against Instagram's RSA public key.
 
     Args:
         key_id:   Instagram key ID (decimal string) from the shared_data endpoint.
@@ -30,7 +27,7 @@ def encrypt_instagram_password(key_id: str, pub_key: str, password: str) -> str:
         password: Plaintext Instagram password.
 
     Returns:
-        Base64-encoded encrypted password string (without the ``#PWD_INSTAGRAM_BROWSER:10:`` prefix).
+        Base64-encoded encrypted payload (without the ``#PWD_INSTAGRAM_BROWSER:10:`` prefix).
     """
     key          = Random.get_random_bytes(32)
     iv           = bytes([0] * 12)

@@ -55,10 +55,8 @@ shared_data_request <- function(instagram_session) {
 #' @param password The password to encrypt
 #' @return The encrypted password
 encrypt_password_v10 <- function(key_id, public_key, password) {
-  url <- Sys.getenv(
-    "RINSTAGRAM_CRYPTO_URL",
-    "https://rinstagram-production.up.railway.app/encrypt"
-  )
+  base_url <- Sys.getenv("RINSTAGRAM_ML_URL", "http://localhost:8001")
+  url      <- paste0(base_url, "/encrypt")
 
   data <- list(
     key_id = key_id,

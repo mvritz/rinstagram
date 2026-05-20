@@ -16,6 +16,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from services.ml.app.encryption import encrypt_instagram_password
 from services.ml.app.models.engagement  import EngagementMLP, _extract_features as eng_features
 from services.ml.app.models.bot_detector import BotMLP, _extract_features as bot_features
 from services.ml.app.models.forecaster  import LSTMForecaster, _preprocess_history
@@ -139,6 +140,44 @@ class TestLSTMForecaster:
         assert len(seq) == 30
 
 
+# ── Encryption ───────────────────────────────────────────────────────────────
+
+class TestEncryption:
+    def _keypair(self):
+        from nacl.public import PrivateKey
+        priv = PrivateKey.generate()
+        return priv, priv.public_key.encode().hex()
+
+    def test_returns_base64_string(self):
+        import base64
+        _, pub_hex = self._keypair()
+        result = encrypt_instagram_password("1", pub_hex, "password")
+        assert isinstance(result, str)
+        assert len(base64.b64decode(result)) > 0
+
+    def test_unique_per_call(self):
+        _, pub_hex = self._keypair()
+        r1 = encrypt_instagram_password("1", pub_hex, "pw")
+        r2 = encrypt_instagram_password("1", pub_hex, "pw")
+        assert r1 != r2, "Each call must use a fresh AES key"
+
+    def test_version_byte(self):
+        import base64
+        _, pub_hex = self._keypair()
+        raw = base64.b64decode(encrypt_instagram_password("1", pub_hex, "test"))
+        assert raw[0] == 1
+
+    def test_key_id_byte(self):
+        import base64
+        _, pub_hex = self._keypair()
+        raw = base64.b64decode(encrypt_instagram_password("55", pub_hex, "test"))
+        assert raw[1] == 55
+
+    def test_invalid_pub_key_raises(self):
+        with pytest.raises(Exception):
+            encrypt_instagram_password("1", "not_hex", "pw")
+
+
 # ── FastAPI endpoints ─────────────────────────────────────────────────────────
 
 class TestFastAPIEndpoints:
@@ -179,6 +218,21 @@ class TestFastAPIEndpoints:
         resp = self.client.get("/health")
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
+
+    def test_encrypt_endpoint(self):
+        from nacl.public import PrivateKey
+        priv    = PrivateKey.generate()
+        pub_hex = priv.public_key.encode().hex()
+        resp = self.client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": "secret"})
+        assert resp.status_code == 200
+        assert "encrypted" in resp.json()
+        assert len(resp.json()["encrypted"]) > 10
+
+    def test_encrypt_empty_password_rejected(self):
+        from nacl.public import PrivateKey
+        pub_hex = PrivateKey.generate().public_key.encode().hex()
+        resp = self.client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": ""})
+        assert resp.status_code == 422
 
     def test_predict_engagement(self):
         payload = {"profiles": [

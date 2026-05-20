@@ -1,11 +1,14 @@
 """
-rinstagram ML Service
+rinstagram Service
 
-FastAPI microservice providing four machine-learning inference endpoints:
-  - POST /predict/engagement  — MLP engagement rate predictor
-  - POST /predict/bot         — LightGBM + MLP ensemble bot detector
-  - POST /predict/growth      — LSTM follower growth forecaster
-  - POST /predict/niche       — DistilBERT content niche classifier
+Unified FastAPI service providing Instagram password encryption and all
+machine-learning inference endpoints:
+
+  POST /encrypt               — Instagram v10 AES-GCM + NaCl password encryption
+  POST /predict/engagement    — MLP engagement rate predictor
+  POST /predict/bot           — LightGBM + MLP ensemble bot detector
+  POST /predict/growth        — LSTM follower growth forecaster
+  POST /predict/niche         — DistilBERT content niche classifier
 """
 
 import logging
@@ -19,6 +22,7 @@ from .config import (
     DEVICE, ENGAGEMENT_WEIGHTS, BOT_MLP_WEIGHTS, BOT_GBM_WEIGHTS,
     FORECASTER_WEIGHTS, CLASSIFIER_WEIGHTS,
 )
+from .encryption import encrypt_instagram_password
 from .models import (
     load_engagement_model,
     load_bot_model,
@@ -30,6 +34,7 @@ from .models import (
     NicheClassifier,
 )
 from .schemas import (
+    EncryptRequest,    EncryptResponse,
     EngagementRequest, EngagementResponse,
     BotRequest,        BotResponse,
     GrowthRequest,     GrowthResponse,
@@ -62,14 +67,14 @@ async def lifespan(app: FastAPI):
     logger.info("  → Niche classifier (DistilBERT)")
     _models["classifier"] = load_classifier_model(CLASSIFIER_WEIGHTS, DEVICE)
 
-    logger.info("All models ready.")
+    logger.info("All models ready. Encryption endpoint active.")
     yield
     _models.clear()
 
 
 app = FastAPI(
-    title       = "rinstagram ML Service",
-    description = "Machine learning inference for Instagram analytics",
+    title       = "rinstagram Service",
+    description = "Unified Instagram analytics service — encryption + ML inference",
     version     = "2.0.0",
     docs_url    = "/docs",
     redoc_url   = "/redoc",
@@ -84,10 +89,13 @@ app.add_middleware(
 )
 
 
+# ── Meta ────────────────────────────────────────────────────────────────────
+
 @app.get("/health", response_model=HealthResponse, tags=["meta"])
 def health() -> HealthResponse:
     return HealthResponse(
-        models={
+        service = "rinstagram",
+        models  = {
             "engagement":  "engagement" in _models,
             "bot":         "bot"        in _models,
             "forecaster":  "forecaster" in _models,
@@ -98,8 +106,27 @@ def health() -> HealthResponse:
 
 @app.get("/", tags=["meta"])
 def index() -> dict:
-    return {"project": "rinstagram", "service": "ml", "author": "github.com/mvritz"}
+    return {"project": "rinstagram", "author": "github.com/mvritz"}
 
+
+# ── Encryption ───────────────────────────────────────────────────────────────
+
+@app.post("/encrypt", response_model=EncryptResponse, tags=["encryption"])
+def encrypt(body: EncryptRequest) -> EncryptResponse:
+    """
+    Encrypt a plaintext Instagram password using the v10 AES-GCM + NaCl
+    envelope scheme required by the Instagram login API.
+
+    Called automatically by the R package's `lscrape()` login flow.
+    """
+    try:
+        encrypted = encrypt_instagram_password(body.key_id, body.pub_key, body.password)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Encryption failed: {exc}") from exc
+    return EncryptResponse(encrypted=encrypted)
+
+
+# ── ML Inference ─────────────────────────────────────────────────────────────
 
 @app.post("/predict/engagement", response_model=EngagementResponse, tags=["inference"])
 def predict_engagement(body: EngagementRequest) -> EngagementResponse:

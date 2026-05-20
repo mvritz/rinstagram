@@ -35,8 +35,7 @@
 | Data collection | R (`httr`) | Anonymous + authenticated Instagram scraping |
 | Persistence | SQLite (`DBI` + `RSQLite`) | Time-series snapshots for growth tracking |
 | Analytics | R | Engagement rate, Gini coefficient, follower ratios |
-| Encryption | Python / FastAPI | Instagram v10 AES-GCM + NaCl password encryption |
-| ML inference | Python / PyTorch / HuggingFace | 4 neural network models (see below) |
+| Backend service | Python / FastAPI (`:8001`) | Encryption + 4 neural network models in one process |
 | Visualisation | R / plotly + Shiny | Interactive dashboard |
 | CI/CD | GitHub Actions + Docker | Automated testing across R and Python |
 
@@ -62,21 +61,22 @@
 │  forecast_growth()  classify_niche()               │
 │  plot_growth()  plot_comparison()  plot_bot_risk() │
 │  launch_dashboard()                                │
-└──────────┬───────────────────────────┬─────────────┘
-           │                           │
-           ▼                           ▼
-┌─────────────────────┐    ┌──────────────────────────┐
-│  Crypto Service     │    │  ML Service              │
-│  (FastAPI :8000)    │    │  (FastAPI :8001)          │
-│                     │    │                          │
-│  POST /encrypt      │    │  POST /predict/engagement│
-│  GET  /health       │    │  POST /predict/bot       │
-│                     │    │  POST /predict/growth    │
-└─────────────────────┘    │  POST /predict/niche     │
-                           └──────────────────────────┘
-           │                           │
-           └──────────┬────────────────┘
-                      ▼
+└──────────────────────┬─────────────────────────────┘
+                       │
+                       ▼
+          ┌────────────────────────────┐
+          │  rinstagram Service        │
+          │  (FastAPI :8001)           │
+          │                            │
+          │  POST /encrypt             │
+          │  POST /predict/engagement  │
+          │  POST /predict/bot         │
+          │  POST /predict/growth      │
+          │  POST /predict/niche       │
+          │  GET  /health              │
+          └────────────┬───────────────┘
+                       │
+                       ▼
               ┌───────────────┐
               │  SQLite DB    │
               │  profiles     │
@@ -94,7 +94,7 @@
 remotes::install_github("mvritz/rinstagram")
 ```
 
-### Python Services (Docker — recommended)
+### Python Service (Docker — recommended)
 
 ```bash
 git clone https://github.com/mvritz/rinstagram.git
@@ -102,30 +102,25 @@ cd rinstagram
 docker compose up --build
 ```
 
-The crypto service starts on `:8000` and the ML service on `:8001`.
+The service starts on `:8001` and serves all endpoints including `/encrypt`.
 
-### Python Services (local)
+### Python Service (local)
 
 ```bash
-# Crypto service
-cd services/crypto
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-
-# ML service (new terminal)
 cd services/ml
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
 
-### Environment variables (R)
+### Environment variable (R)
 
 Add to `~/.Renviron`:
 
 ```
-RINSTAGRAM_CRYPTO_URL=http://localhost:8000/encrypt
 RINSTAGRAM_ML_URL=http://localhost:8001
 ```
+
+All R functions — including `lscrape()` encryption — read `RINSTAGRAM_ML_URL` automatically.
 
 ---
 
@@ -264,24 +259,21 @@ rinstagram/
 │   ├── ui.R
 │   └── server.R
 ├── tests/testthat/           # R unit tests
-├── services/
-│   ├── crypto/               # Instagram encryption microservice
-│   │   ├── app/              # FastAPI app
-│   │   ├── tests/            # pytest tests
-│   │   └── Dockerfile
-│   └── ml/                   # ML inference microservice
-│       ├── app/
-│       │   ├── main.py       # FastAPI app
-│       │   ├── models/       # 4 ML model implementations
-│       │   └── schemas.py    # Pydantic request/response schemas
-│       ├── training/         # Training scripts + synthetic data generator
-│       ├── notebooks/        # Jupyter EDA + model exploration
-│       ├── weights/          # Saved model weights (auto-generated)
-│       └── Dockerfile
+├── services/ml/              # Unified backend service (encryption + ML)
+│   ├── app/
+│   │   ├── main.py           # FastAPI — all endpoints
+│   │   ├── encryption.py     # Instagram v10 AES-GCM + NaCl encryption
+│   │   ├── models/           # 4 ML model implementations
+│   │   ├── schemas.py        # Pydantic request/response schemas
+│   │   └── config.py
+│   ├── training/             # Training scripts + synthetic data generator
+│   ├── notebooks/            # Jupyter EDA + model exploration
+│   ├── weights/              # Saved model weights (auto-generated)
+│   └── Dockerfile
 ├── docker-compose.yml
 ├── .github/workflows/
-│   ├── r-check.yml           # R CMD check + testthat + coverage
-│   └── python-tests.yml      # pytest for both services + Docker build
+│   ├── r-check.yml           # R CMD check + lintr + coverage
+│   └── python-tests.yml      # pytest + Docker build
 └── DESCRIPTION
 ```
 
@@ -293,10 +285,7 @@ rinstagram/
 # R tests
 Rscript -e "testthat::test_package('rinstagram')"
 
-# Python — crypto service
-pytest services/crypto/tests/ -v
-
-# Python — ML service
+# Python — unified service (encryption + ML)
 pytest services/ml/tests/ -v
 ```
 

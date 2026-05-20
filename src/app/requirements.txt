@@ -1,4 +1,0 @@
-pycryptodomex
-pynacl
-flask
-gunicorn
