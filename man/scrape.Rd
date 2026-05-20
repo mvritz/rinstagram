@@ -2,22 +2,40 @@
 % Please edit documentation in R/functions.R
 \name{scrape}
 \alias{scrape}
-\title{Scrape Instagram profiles (without session)}
+\title{Scrape Instagram profiles (anonymous)}
 \usage{
-scrape(usernames, file_path)
+scrape(
+  usernames,
+  file_path = "data/profiles.csv",
+  db_path = "data/rinstagram.db",
+  delay_range = c(3, 7),
+  max_retries = 3L
+)
 }
 \arguments{
-\item{usernames}{A list of usernames to scrape}
+\item{usernames}{Character vector of Instagram usernames.}
 
-\item{file_path}{The optional file path to save the scraped data to (default: "data/profiles.csv")}
+\item{file_path}{Optional path for legacy CSV output. Set to \code{NULL}
+to disable CSV writing (data is still returned as a data frame).}
+
+\item{db_path}{Path to the SQLite database for persistent storage.
+Set to \code{NULL} to disable database persistence.}
+
+\item{delay_range}{Numeric vector \code{c(min, max)} giving the random
+inter-request delay in seconds. Default: \code{c(3, 7)}.}
+
+\item{max_retries}{Maximum number of retry attempts per username.}
 }
 \value{
-A data frame containing the scraped data (username, followers, following, post count) or NULL if an error occurred
+A data frame with columns \code{username}, \code{follower_count},
+\code{following_count}, \code{posts_count}, or \code{NULL} on total failure.
 }
 \description{
-A function to scrape Instagram profiles without a session. You can use this function to scrape public profiles
-If you get rate limited, you can try using the `lscrape` function which is more robust as it is using a profile for scraping
+Scrapes public Instagram profiles without an authenticated session.
+For higher volumes or richer post-level data, use \code{\link{lscrape}}.
 }
 \examples{
-scraped_data <- scrape(c("osamason", "praiseche"), "path/to/profiles.csv")
+\dontrun{
+  data <- scrape(c("cristiano", "leomessi"))
+}
 }

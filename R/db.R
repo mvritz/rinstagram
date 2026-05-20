@@ -9,8 +9,10 @@
 #' @export
 #'
 #' @examples
-#' con <- db_connect()
-#' DBI::dbDisconnect(con)
+#' \dontrun{
+#'   con <- db_connect(tempfile(fileext = ".db"))
+#'   DBI::dbDisconnect(con)
+#' }
 db_connect <- function(db_path = "data/rinstagram.db") {
   dir_path <- dirname(db_path)
   if (!dir.exists(dir_path)) dir.create(dir_path, recursive = TRUE)

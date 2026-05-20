@@ -1,0 +1,8 @@
+^\.github$
+^services$
+^assets$
+^docker-compose\.yml$
+^CHANGELOG\.md$
+^data$
+^\.gitignore$
+^README\.md$

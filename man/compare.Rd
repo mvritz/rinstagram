@@ -2,22 +2,27 @@
 % Please edit documentation in R/functions.R
 \name{compare}
 \alias{compare}
-\title{Compare Instagram profile data}
+\title{Compare and summarise scraped Instagram profile data}
 \usage{
-compare(file_path, path_to_save = NA)
+compare(source, path_to_save = NA)
 }
 \arguments{
-\item{file_path}{The file path to the CSV file}
+\item{source}{Either a file path to a CSV file (character) or a data frame
+from \code{scrape()} / \code{lscrape()}.}
 
-\item{path_to_save}{The optional file path to save the summary data to}
+\item{path_to_save}{Optional file path to write the summary CSV to.}
 }
 \value{
-A data frame containing the summary of the data
+A data frame containing the summary statistics.
 }
 \description{
-A function to compare Instagram profile data from a CSV file
+Reads a CSV file or accepts a data frame and computes summary statistics
+including average likes, average comments, follower-to-following ratio,
+and engagement rate.
 }
 \examples{
-instagram_data_comparison <- compare("path_to_your_instagram_data.csv")
-instagram_data_comparison <- compare("path_to_your_instagram_data.csv", "path_to_save_summary.csv")
+\dontrun{
+  compare("data/profiles.csv")
+  compare("data/profiles.csv", "data/summary.csv")
+}
 }

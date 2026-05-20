@@ -11,10 +11,11 @@ Description: An end-to-end Instagram analytics platform for R. Scrape real-time
     interactive Shiny dashboard for visualization.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
 Imports:
     httr,
     jsonlite,
-    magrittr,
     DBI,
     RSQLite,
     cli (>= 3.0.0),

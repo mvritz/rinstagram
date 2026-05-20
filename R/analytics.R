@@ -2,6 +2,7 @@
 
 compute_engagement_rate <- function(avg_likes, avg_comments, follower_count) {
   if (is.na(follower_count) || follower_count == 0) return(NA_real_)
+  if (is.na(avg_likes) && is.na(avg_comments)) return(NA_real_)
   if (is.na(avg_likes)) avg_likes <- 0
   if (is.na(avg_comments)) avg_comments <- 0
   (avg_likes + avg_comments) / follower_count

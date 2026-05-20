@@ -2,28 +2,46 @@
 % Please edit documentation in R/functions.R
 \name{lscrape}
 \alias{lscrape}
-\title{Scrape Instagram profiles (with session) [lscrape -> logged in scraping]}
+\title{Scrape Instagram profiles (authenticated)}
 \usage{
-lscrape(usernames, profile_username, profile_password, file_path)
+lscrape(
+  usernames,
+  profile_username,
+  profile_password,
+  file_path = "data/profiles.csv",
+  db_path = "data/rinstagram.db",
+  delay_range = c(3, 7),
+  max_retries = 3L
+)
 }
 \arguments{
-\item{usernames}{A list of usernames to scrape}
+\item{usernames}{Character vector of Instagram usernames.}
 
-\item{profile_username}{The username of the Instagram account to use for scraping}
+\item{profile_username}{Username of the Instagram account used for scraping.}
 
-\item{profile_password}{The password of the Instagram account to use for scraping}
+\item{profile_password}{Password of the Instagram account used for scraping.}
 
-\item{file_path}{The optional file path to save the scraped data to (default: "data/profiles.csv")}
+\item{file_path}{Optional path for legacy CSV output. Set to \code{NULL}
+to disable CSV writing.}
+
+\item{db_path}{Path to the SQLite database. Set to \code{NULL} to disable.}
+
+\item{delay_range}{Random inter-request delay in seconds.}
+
+\item{max_retries}{Maximum retry attempts per username.}
 }
 \value{
-A data frame containing the scraped data (username, followers, following, post count) or NULL if an error occurred
+A data frame with columns \code{username}, \code{follower_count},
+\code{following_count}, \code{posts_count}, \code{posts_likes},
+\code{posts_comments}, \code{posts_dates}, or \code{NULL} on failure.
 }
 \description{
-A function to scrape Instagram profiles with a session
-You need an account to use this function
-Do NOT use your own account for scraping as it might get rate limited
-Use a dummy account or a throwaway account
+Scrapes Instagram profiles using an authenticated session, enabling access
+to post-level data (likes, comments, dates) and higher request quotas.
+Use a throwaway account — never your personal account.
 }
 \examples{
-scraped_data <- lscrape(c("osamason", "praiseche"), "mytestaccount", "mypassword", "path/to/profiles.csv")
+\dontrun{
+  data <- lscrape(c("cristiano"), "dummy_account", "password123")
+}
 }

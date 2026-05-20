@@ -65,12 +65,12 @@ encrypt_password_v10 <- function(key_id, public_key, password) {
   )
 
   json_data <- jsonlite::toJSON(data, auto_unbox = TRUE)
-  headers <- add_headers('Content-Type' = 'application/json')
+  headers <- httr::add_headers('Content-Type' = 'application/json')
 
   response <- httr::POST(url, body = json_data, encode = "json", config = headers)
   data <- jsonlite::fromJSON(httr::content(response, as = "text"))
 
-  if (status_code(response) == 200) {
+  if (httr::status_code(response) == 200) {
     return(data$encrypted)
   } else {
     stop("Error encrypting password")

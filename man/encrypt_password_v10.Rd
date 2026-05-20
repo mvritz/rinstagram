@@ -17,5 +17,7 @@ encrypt_password_v10(key_id, public_key, password)
 The encrypted password
 }
 \description{
-A function to encrypt a password using my custom api found in src/app/
+Encrypts an Instagram password using the rinstagram ML microservice
+(\code{POST /encrypt}), which implements Instagram's v10 AES-GCM + NaCl
+SealedBox encryption protocol.
 }
