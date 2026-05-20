@@ -1,3 +1,29 @@
 .Rproj.user
 .idea/
 .Rhistory
+*.Rcheck/
+*.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+coverage*.xml
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# SQLite databases
+data/*.db
+
+# Model weights (auto-generated, large files)
+services/ml/weights/*.pt
+services/ml/weights/*.txt
+!services/ml/weights/.gitkeep
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
