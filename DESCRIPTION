@@ -1,13 +1,33 @@
 Package: rinstagram
-Title: An Instagram Crawler for R
-Version: 1.0.0
+Title: Instagram Analytics and Intelligence Platform
+Version: 2.0.0
 Authors@R:
-    person("Moritz", "Dresch", , "Mo.Dresch@campus.lmu.de", role = c("aut", "cre"))
-Description: An Instagram crawler for R that allows you to scrape realtime user data to get information on posts, followers, and more.
-License: use_mit_license()
+    person("Moritz", "Dresch", , "Mo.Dresch@campus.lmu.de", role = c("aut", "cre"),
+           comment = c(ORCID = ""))
+Description: An end-to-end Instagram analytics platform for R. Scrape real-time
+    profile data, track growth over time with SQLite persistence, and run
+    machine learning inference (engagement prediction, bot detection, growth
+    forecasting, niche classification) via a FastAPI microservice. Includes an
+    interactive Shiny dashboard for visualization.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     httr,
     jsonlite,
-    magrittr
+    magrittr,
+    DBI,
+    RSQLite,
+    cli (>= 3.0.0),
+    ggplot2,
+    plotly,
+    scales,
+    methods
+Suggests:
+    shiny,
+    shinydashboard,
+    shinycssloaders,
+    DT,
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
 RoxygenNote: 7.3.2

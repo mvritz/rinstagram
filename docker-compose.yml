@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  crypto:
+    build:
+      context: services/crypto
+      dockerfile: Dockerfile
+    image: rinstagram-crypto:latest
+    container_name: rinstagram-crypto
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  ml:
+    build:
+      context: services/ml
+      dockerfile: Dockerfile
+    image: rinstagram-ml:latest
+    container_name: rinstagram-ml
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TORCH_DEVICE=cpu
+    volumes:
+      - ml-weights:/service/weights
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    depends_on:
+      crypto:
+        condition: service_healthy
+
+volumes:
+  ml-weights:
+    driver: local

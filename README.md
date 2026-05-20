@@ -1,209 +1,317 @@
-<!-- Please be careful editing the below HTML, as GitHub is quite finicky with anything that looks like an HTML tag in GitHub Flavored Markdown. -->
 <p align="center">
-  <img src="assets/banner.png" alt="Banner">
+  <img src="assets/banner.png" alt="rinstagram banner">
 </p>
+
 <p align="center">
-  <b>R package for scraping Instagram user data</b>
+  <b>Instagram Analytics &amp; Intelligence Platform — R + Python + Neural Networks</b>
 </p>
+
 <p align="center">
+  <a href="https://github.com/mvritz/rinstagram/actions/workflows/r-check.yml">
+    <img src="https://github.com/mvritz/rinstagram/actions/workflows/r-check.yml/badge.svg" alt="R CI">
+  </a>
+  <a href="https://github.com/mvritz/rinstagram/actions/workflows/python-tests.yml">
+    <img src="https://github.com/mvritz/rinstagram/actions/workflows/python-tests.yml/badge.svg" alt="Python CI">
+  </a>
+  <a href="https://codecov.io/gh/mvritz/rinstagram">
+    <img src="https://codecov.io/gh/mvritz/rinstagram/branch/main/graph/badge.svg" alt="Coverage">
+  </a>
   <a href="https://github.com/mvritz/rinstagram/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=purple" alt="License Badge">
+    <img src="https://img.shields.io/github/license/mvritz/rinstagram?color=purple" alt="License">
   </a>
-  <a href="https://github.com/mvrtiz/rinstagram/blob/master/CHANGELOG.md">
-    <img src="https://img.shields.io/badge/view_-changelog_-purple" alt="Changelog Badge">
-  </a>
-  <img src="https://img.shields.io/badge/R--CMD--check_-passing_-purple" alt="Version Badge">
+  <img src="https://img.shields.io/badge/version-2.0.0-purple" alt="Version">
 </p>
 
-# rinstagram 📸
+---
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Usage](#usage)
-    - [scrape](#scrape)
-        - [Usage](#usage)
-        - [Output](#output)
-        - [Explanation](#explanation)
-    - [lscrape](#lscrape)
-        - [Usage](#usage-1)
-        - [Output](#output-1)
-        - [Explanation](#explanation-1)
-    - [compare](#compare)
-        - [Usage](#usage-2)
-        - [Output](#output-2)
-        - [Explanation](#explanation-2)
-- [Contribution](#contribution)
-- [License](#license)
-- [Disclaimer](#disclaimer)
+## Overview
 
-# Introduction 📝
+**rinstagram** is an end-to-end Instagram analytics platform built in R with Python ML microservices. It goes far beyond scraping — it scrapes, stores, analyses, and applies neural networks to reveal deep insights about any Instagram profile.
 
-rinstagram is an R package which allows you to work with real time Instagram data. It provides you with the ability to
-scrape Instagram user data so you can analyze it in R. This package was built for my university project in Advanced
-Statistical Software at _Ludwig-Maximilians-University Munich_. To read more about the motivation about this software
-read [this PDF](assets/motivation.pdf).
+### What it does
 
-# Installation 🖥️
+| Layer | Technology | Capability |
+|-------|-----------|-----------|
+| Data collection | R (`httr`) | Anonymous + authenticated Instagram scraping |
+| Persistence | SQLite (`DBI` + `RSQLite`) | Time-series snapshots for growth tracking |
+| Analytics | R | Engagement rate, Gini coefficient, follower ratios |
+| Encryption | Python / FastAPI | Instagram v10 AES-GCM + NaCl password encryption |
+| ML inference | Python / PyTorch / HuggingFace | 4 neural network models (see below) |
+| Visualisation | R / plotly + Shiny | Interactive dashboard |
+| CI/CD | GitHub Actions + Docker | Automated testing across R and Python |
 
-You can simply install the package from github using the following command:
+### Machine Learning Models
 
-```R
+| Model | Architecture | Task |
+|-------|-------------|------|
+| **Engagement Predictor** | 3-layer MLP (256→128→64), BatchNorm, Dropout | Predict engagement rate from profile features |
+| **Bot Detector** | Soft-vote ensemble: LightGBM + 2-layer MLP | Classify bot/fake accounts with probability score |
+| **Growth Forecaster** | 2-layer LSTM + MC Dropout uncertainty | Multi-step follower count forecasting (30/60/90 days) |
+| **Niche Classifier** | DistilBERT fine-tuned classification head | Classify account into 9 content niches |
+
+---
+
+## Architecture
+
+```
+┌────────────────────────────────────────────────────┐
+│              R Package (rinstagram)                │
+│                                                    │
+│  scrape()  lscrape()  track()  compare()           │
+│  analyze()  predict_engagement()  detect_bots()    │
+│  forecast_growth()  classify_niche()               │
+│  plot_growth()  plot_comparison()  plot_bot_risk() │
+│  launch_dashboard()                                │
+└──────────┬───────────────────────────┬─────────────┘
+           │                           │
+           ▼                           ▼
+┌─────────────────────┐    ┌──────────────────────────┐
+│  Crypto Service     │    │  ML Service              │
+│  (FastAPI :8000)    │    │  (FastAPI :8001)          │
+│                     │    │                          │
+│  POST /encrypt      │    │  POST /predict/engagement│
+│  GET  /health       │    │  POST /predict/bot       │
+│                     │    │  POST /predict/growth    │
+└─────────────────────┘    │  POST /predict/niche     │
+                           └──────────────────────────┘
+           │                           │
+           └──────────┬────────────────┘
+                      ▼
+              ┌───────────────┐
+              │  SQLite DB    │
+              │  profiles     │
+              │  snapshots    │
+              └───────────────┘
+```
+
+---
+
+## Installation
+
+### R Package
+
+```r
 remotes::install_github("mvritz/rinstagram")
 ```
 
-# Usage 📊
+### Python Services (Docker — recommended)
 
-The package has 2 main functions: `scrape` and `lscrape`. There is also a third function for comparing your data
-called `compare`.
-
-## scrape
-
-### Usage
-
-This functions allows you to get the data from a list of users without being logged in or having an API key.
-You can use it like this:
-
-```R
-library(rinstagram)
-
-users <- c("osamason", "praiseche", "cristiano")
-list_of_users <- scrape(users, "data/profiles.csv")
+```bash
+git clone https://github.com/mvritz/rinstagram.git
+cd rinstagram
+docker compose up --build
 ```
 
-The function takes 2 arguments: `users` and `output_file`.
+The crypto service starts on `:8000` and the ML service on `:8001`.
 
-- The `users` argument is a vector of usernames and
-- the `output_file` is the optional path to the file where the data will be saved.
+### Python Services (local)
 
-> Important is that instagram **ratelimits** the requests, so you should not scrape more than **10-20 users at once**.
-> The
-> function has a **built-in delay between requests**.
+```bash
+# Crypto service
+cd services/crypto
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 
-### Output
-
-The output is a list of dataframes, where each dataframe contains the data of one user.
-The data which also will be saved in the restrictive csv file looks like this:
-
-| username  | follower_count | following_count | posts_count |
-|-----------|----------------|-----------------|-------------|
-| osamason  | 268735         | 435             | 4           |
-| praiseche | 36436          | 234             | 2           |
-| cristiano | 633484938      | 331             | 638         |
-
-### Explanation
-
-The function works by scraping the data from the user's profile API endpoint with a dummy CSRF Token and User-Agent.
-This returns a JSON text which is parsed.
-The endpoint works without using a session ID or similar. This is also
-the reason why the function is limited to a small number of users at once.
-
-## lscrape
-
-### Usage
-
-This function allows you to get the data from a list of users by using a session ID. That means that you have to use
-your own account to scrape the data. *
-*_I highly recommend using a dummy account for this and not your own account to avoid getting flagged._**
-Using your own account (= scraping with a session ID) is useful if you want to scrape a lot of users at once.
-You can use it like this:
-
-```R
-library(rinstagram)
-
-users <- c("osamason", "praiseche", "cristiano")
-profile_username <- "your_username"
-profile_password <- "your_password"
-list_of_users <- lscrape(users, profile_username, profile_password, "data/profiles.csv")
+# ML service (new terminal)
+cd services/ml
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8001
 ```
 
-The function takes 4 arguments: `users`, `profile_username`, `profile_password` and `output_file`.
+### Environment variables (R)
 
-- The `users` argument is a vector of usernames,
-- the `profile_username` is your instagram username,
-- the `profile_password` is your instagram password and
-- the `output_file` is the optional path to the file where the data will be saved.
+Add to `~/.Renviron`:
 
-### Output
-
-Not only the number of scraped users is higher with this function the output is also more detailed during the fact that
-you can now access the whole instagram API.
-
-| username  | follower_count | following_count | posts_count | posts_likes    | posts_comments | posts_dates            |
-|-----------|----------------|-----------------|-------------|----------------|----------------|------------------------|
-| osamason  | 268735         | 435             | 4           | 103234; 234234 | 12493; 23423   | 2021-01-01; 2021-01-02 |
-| praiseche | 36436          | 234             | 2           | 234; 234       | 234; 234       | 2021-01-01; 2021-01-02 |
-| cristiano | 633484938      | 331             | 638         | 549234; 234234 | 23423; 23423   | 2021-01-01; 2021-01-02 |
-
-### Explanation
-
-This function is way more complex than the previous one.
-
-#### Step 1: Password Encryption
-
-To login the user with the Instagram API to retreive a session ID (to scrape more and more detailed data) we have to
-encrypt the password.
-The encryption works with a public key, a key ID and of course the password. To encrypt the password I wrote a small
-Python-Encryption-API which can be found in the `src` folder (you can also find a READNE ind there where the encryption
-is explained in more detail).
-To get the encrypted password we have to get the public key and the key ID from the Instagram API and then send a
-request to my Encryption-API.
-This request returns the encrypted password which we can use to login.
-
-#### Step 2: Login
-
-With this encrypted password and a dummy CSRF Token and User-Agent we can login the user to the Instagram API.
-This returns a JSON with your own user ID (which will be used later) and the cookies of the response of the login
-request containing the session ID.
-
-#### Step 3: Data Scraping
-
-In the last step we can now scrape 2 endpoints (one containing the followers data and one containing the posts data)
-with the session ID and our own userID for
-each user in the given list. This returns a JSON which is parsed and saved in the output file.
-
-## compare
-
-### Usage
-
-With this function you can compare the data of your csv file and get a summary of the data and its relations.
-You can use it like this:
-
-```R
-library(rinstagram)
-
-compare("data/profiles.csv", "data/summary.csv")
+```
+RINSTAGRAM_CRYPTO_URL=http://localhost:8000/encrypt
+RINSTAGRAM_ML_URL=http://localhost:8001
 ```
 
-The function takes 2 arguments: `file_path` and `path_to_save`.
+---
 
-- The `file_path` is the path to the file where the data is saved.
-- The `path_to_save` is the optional path to the file where the summary will be saved.
+## Usage
 
-### Output
+### Scraping
 
-The output is a csv file with the summary of the data. The summary contains the average likes and comments per post and
-the follower to following ratio.
+```r
+library(rinstagram)
 
-| Username  | Follower_Count | Following_Count | Posts_Count | Average_Likes | Average_Comments | Follower_to_Following_Ratio |
-|-----------|----------------|-----------------|-------------|---------------|------------------|-----------------------------|
-| osamason  | 268735         | 58              | 4           | 989762        | 16352            | 4633.36206896552            |
-| instagram | 674372995      | 105             | 7731        | NA            | NA               | 6422599.95238095            |
+# Anonymous scraping (no login required)
+data <- scrape(c("cristiano", "leomessi", "neymarjr"))
 
-### Explanation
+# Authenticated scraping (post-level data: likes, comments, dates)
+# Use a throwaway account — never your personal account
+data <- lscrape(c("cristiano", "leomessi"),
+                profile_username = "my_dummy_account",
+                profile_password = "my_password")
+```
 
-The function works by reading the data from the csv file and calculating the average likes and comments per post and the
-follower to following ratio.
+### Analytics
 
-# Contribution 🤝
+```r
+# Enrich with engagement rate, Gini coefficient, and follower ratios
+enriched <- analyze(data)
 
-If you want to contribute to the package feel free to open a pull request.
+# Full comparison summary (saved to CSV)
+compare(enriched, "data/summary.csv")
+```
 
-# License 📜
+### Machine Learning
 
-MIT License:
-https://opensource.org/licenses/MIT
+```r
+# Predict engagement rates (MLP neural network)
+enriched <- predict_engagement(analyze(data))
 
-# Disclaimer 🚨
+# Detect bot accounts (LightGBM + MLP ensemble)
+enriched <- detect_bots(enriched)
 
-This package is for educational purposes only. I am not responsible for any misuse of the package. Use at your own risk.
-The package is not affiliated with Instagram or Facebook. The package is not an official API for Instagram.
+# Classify content niche (DistilBERT)
+enriched <- classify_niche(enriched)
+
+# View results
+print(enriched[, c("username", "engagement_rate", "ml_predicted_engagement",
+                   "bot_probability", "bot_risk_label", "niche")])
+```
+
+### Growth Tracking & Forecasting
+
+```r
+# Track profiles over time (run daily via cron or taskscheduleR)
+track(c("cristiano", "leomessi"))
+
+# Forecast next 30 days with LSTM + uncertainty intervals
+forecast <- forecast_growth("cristiano", horizon = 30)
+
+# Visualise
+plot_growth("cristiano", forecast = forecast)
+```
+
+### Visualisation
+
+```r
+# Interactive engagement bar chart
+plot_engagement_dist(enriched)
+
+# Radar comparison of multiple profiles
+plot_comparison(enriched)
+
+# Bot risk chart
+plot_bot_risk(enriched)
+```
+
+### Shiny Dashboard
+
+```r
+# Launch the interactive analytics dashboard
+# (requires shiny, shinydashboard, DT — installed automatically)
+launch_dashboard()
+```
+
+The dashboard provides five tabs:
+- **Profile Explorer** — real-time scrape + ML scores (engagement, bot risk, niche)
+- **Growth Tracker** — plotly growth chart with LSTM forecast and confidence band
+- **Comparison** — radar chart of normalised metrics across profiles
+- **Leaderboard** — sortable, exportable table ranked by engagement rate
+- **Bot Detector** — colour-coded risk chart and results table
+
+---
+
+## Training ML Models
+
+Pre-built weights are generated automatically on first service start using synthetic data. To train with more samples or on real scraped data:
+
+```bash
+cd services/ml
+
+# Engagement predictor (MLP)
+python -m training.train_engagement --epochs 100 --n-samples 50000
+
+# Bot detector (LightGBM + MLP ensemble)
+python -m training.train_bot_detector --n-samples 100000
+
+# Growth forecaster (LSTM)
+python -m training.train_forecaster --epochs 150 --n-samples 30000
+
+# Niche classifier (DistilBERT head — backbone frozen)
+python -m training.train_classifier --epochs 30 --n-per-class 1000
+
+# Full DistilBERT fine-tuning (GPU recommended)
+python -m training.train_classifier --epochs 20 --full-finetune --device cuda
+```
+
+Weights are saved to `services/ml/weights/` and loaded automatically on the next service start.
+
+---
+
+## Repository Structure
+
+```
+rinstagram/
+├── R/                        # R package source
+│   ├── functions.R           # scrape, lscrape, compare
+│   ├── analytics.R           # analyze, predict_*, detect_*, forecast_*, classify_*
+│   ├── track.R               # track() — time-series snapshots
+│   ├── visualize.R           # plot_* functions
+│   ├── db.R                  # SQLite persistence layer
+│   ├── shiny.R               # launch_dashboard()
+│   ├── login.R               # Instagram authentication
+│   ├── graphql.R             # GraphQL scraping
+│   ├── profile.R             # Anonymous profile scraping
+│   ├── types.R               # S4 classes
+│   └── utils.R               # Utilities
+├── inst/shiny/               # Shiny dashboard app
+│   ├── app.R
+│   ├── ui.R
+│   └── server.R
+├── tests/testthat/           # R unit tests
+├── services/
+│   ├── crypto/               # Instagram encryption microservice
+│   │   ├── app/              # FastAPI app
+│   │   ├── tests/            # pytest tests
+│   │   └── Dockerfile
+│   └── ml/                   # ML inference microservice
+│       ├── app/
+│       │   ├── main.py       # FastAPI app
+│       │   ├── models/       # 4 ML model implementations
+│       │   └── schemas.py    # Pydantic request/response schemas
+│       ├── training/         # Training scripts + synthetic data generator
+│       ├── notebooks/        # Jupyter EDA + model exploration
+│       ├── weights/          # Saved model weights (auto-generated)
+│       └── Dockerfile
+├── docker-compose.yml
+├── .github/workflows/
+│   ├── r-check.yml           # R CMD check + testthat + coverage
+│   └── python-tests.yml      # pytest for both services + Docker build
+└── DESCRIPTION
+```
+
+---
+
+## Running Tests
+
+```bash
+# R tests
+Rscript -e "testthat::test_package('rinstagram')"
+
+# Python — crypto service
+pytest services/crypto/tests/ -v
+
+# Python — ML service
+pytest services/ml/tests/ -v
+```
+
+---
+
+## Contributing
+
+Pull requests are welcome. Please run the full test suite before opening a PR.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Disclaimer
+
+This package is for educational and research purposes only. Use a throwaway Instagram account for authenticated scraping. The author is not responsible for any misuse. This project is not affiliated with or endorsed by Instagram / Meta.

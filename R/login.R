@@ -55,7 +55,10 @@ shared_data_request <- function(instagram_session) {
 #' @param password The password to encrypt
 #' @return The encrypted password
 encrypt_password_v10 <- function(key_id, public_key, password) {
-  url <- "https://rinstagram-production.up.railway.app/encrypt"
+  url <- Sys.getenv(
+    "RINSTAGRAM_CRYPTO_URL",
+    "https://rinstagram-production.up.railway.app/encrypt"
+  )
 
   data <- list(
     key_id = key_id,
@@ -128,8 +131,6 @@ login_request <- function(instagram_session, username, password, key_id, public_
   res <- httr::POST(url = "https://www.instagram.com/api/v1/web/accounts/login/ajax/", httr::add_headers(.headers = headers), httr::set_cookies(.cookies = cookies), body = data, encode = "form")
   data <- jsonlite::fromJSON(httr::content(res, as = "text"))
   cookies <- httr::cookies(res)
-
-  print(data)
 
   if (data$status != "ok") {
     stop("Error logging in")
