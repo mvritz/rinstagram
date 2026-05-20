@@ -3,18 +3,16 @@ name: Python Service CI
 on:
   push:
     branches: [main, master, develop]
-    paths:
-      - 'services/ml/**'
   pull_request:
     branches: [main, master]
-    paths:
-      - 'services/ml/**'
+  workflow_dispatch:
 
 jobs:
   test:
-    name: Service Tests (Python ${{ matrix.python-version }})
+    name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.11', '3.12']
 
@@ -42,8 +40,10 @@ jobs:
           PYTHONPATH: .
 
       - uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
         with:
           files: coverage.xml
+          flags: python
           token: ${{ secrets.CODECOV_TOKEN }}
 
   docker-build:

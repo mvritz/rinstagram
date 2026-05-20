@@ -3,13 +3,9 @@ name: R Package CI
 on:
   push:
     branches: [main, master, develop]
-    paths:
-      - 'R/**'
-      - 'tests/**'
-      - 'DESCRIPTION'
-      - 'NAMESPACE'
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   R-CMD-check:
@@ -44,8 +40,7 @@ jobs:
           needs: check
 
       - name: Lint R code
-        run: |
-          lintr::lint_package()
+        run: lintr::lint_package()
         shell: Rscript {0}
         continue-on-error: true
 
@@ -56,6 +51,7 @@ jobs:
 
   test-coverage:
     runs-on: ubuntu-latest
+    needs: R-CMD-check
     steps:
       - uses: actions/checkout@v4
 
@@ -82,4 +78,5 @@ jobs:
         with:
           fail_ci_if_error: false
           files: ./cobertura.xml
+          flags: r
           token: ${{ secrets.CODECOV_TOKEN }}

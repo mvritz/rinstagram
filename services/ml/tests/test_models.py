@@ -179,103 +179,87 @@ class TestEncryption:
 
 
 # ── FastAPI endpoints ─────────────────────────────────────────────────────────
+#
+# All endpoint tests receive the `mock_app_client` fixture defined in conftest.py.
+# That fixture patches the four model loader functions so the FastAPI lifespan
+# startup uses MagicMock objects — no PyTorch training or HuggingFace downloads
+# happen during these tests.
 
-class TestFastAPIEndpoints:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        from fastapi.testclient import TestClient
-        from unittest.mock import patch, MagicMock
+def test_health(mock_app_client):
+    resp = mock_app_client.get("/health")
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
+    assert resp.json()["service"] == "rinstagram"
 
-        dummy_engagement = MagicMock()
-        dummy_engagement.predict.return_value = [0.03, 0.08]
 
-        dummy_bot = MagicMock()
-        dummy_bot.predict.return_value = ([0.1, 0.85], ["low", "high"])
+def test_index(mock_app_client):
+    resp = mock_app_client.get("/")
+    assert resp.status_code == 200
+    assert "rinstagram" in resp.json()["project"]
 
-        dummy_forecaster = MagicMock()
-        dummy_forecaster.predict.return_value = (
-            ["2024-02-01", "2024-02-02"],
-            [10000.0, 10100.0],
-            [9800.0,  9900.0],
-            [10200.0, 10300.0],
-        )
 
-        dummy_classifier = MagicMock()
-        dummy_classifier.predict.return_value = (["fitness", "food"], [0.92, 0.88])
+def test_encrypt_endpoint(mock_app_client):
+    from nacl.public import PrivateKey
+    pub_hex = PrivateKey.generate().public_key.encode().hex()
+    resp = mock_app_client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": "secret"})
+    assert resp.status_code == 200
+    assert "encrypted" in resp.json()
+    assert len(resp.json()["encrypted"]) > 10
 
-        models_patch = {
-            "engagement":  dummy_engagement,
-            "bot":         dummy_bot,
-            "forecaster":  dummy_forecaster,
-            "classifier":  dummy_classifier,
-        }
 
-        with patch("services.ml.app.main._models", models_patch):
-            from services.ml.app.main import app
-            self.client = TestClient(app, raise_server_exceptions=True)
+def test_encrypt_empty_password_rejected(mock_app_client):
+    from nacl.public import PrivateKey
+    pub_hex = PrivateKey.generate().public_key.encode().hex()
+    resp = mock_app_client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": ""})
+    assert resp.status_code == 422
 
-    def test_health(self):
-        resp = self.client.get("/health")
-        assert resp.status_code == 200
-        assert resp.json()["status"] == "ok"
 
-    def test_encrypt_endpoint(self):
-        from nacl.public import PrivateKey
-        priv    = PrivateKey.generate()
-        pub_hex = priv.public_key.encode().hex()
-        resp = self.client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": "secret"})
-        assert resp.status_code == 200
-        assert "encrypted" in resp.json()
-        assert len(resp.json()["encrypted"]) > 10
+def test_predict_engagement(mock_app_client):
+    payload = {"profiles": [
+        {"username": "a", "follower_count": 10000, "following_count": 500, "posts_count": 50},
+        {"username": "b", "follower_count": 500,   "following_count": 300, "posts_count": 10},
+    ]}
+    resp = mock_app_client.post("/predict/engagement", json=payload)
+    assert resp.status_code == 200
+    assert len(resp.json()["predictions"]) == 2
 
-    def test_encrypt_empty_password_rejected(self):
-        from nacl.public import PrivateKey
-        pub_hex = PrivateKey.generate().public_key.encode().hex()
-        resp = self.client.post("/encrypt", json={"key_id": "1", "pub_key": pub_hex, "password": ""})
-        assert resp.status_code == 422
 
-    def test_predict_engagement(self):
-        payload = {"profiles": [
-            {"username": "a", "follower_count": 10000, "following_count": 500, "posts_count": 50},
-            {"username": "b", "follower_count": 500,   "following_count": 300, "posts_count": 10},
-        ]}
-        resp = self.client.post("/predict/engagement", json=payload)
-        assert resp.status_code == 200
-        assert len(resp.json()["predictions"]) == 2
+def test_predict_bot(mock_app_client):
+    payload = {"profiles": [
+        {"username": "a", "follower_count": 10000,   "following_count": 500, "posts_count": 50},
+        {"username": "b", "follower_count": 1000000, "following_count": 500, "posts_count": 2},
+    ]}
+    resp = mock_app_client.post("/predict/bot", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["bot_probabilities"]) == 2
+    assert all(r in {"low", "medium", "high"} for r in data["risk_labels"])
 
-    def test_predict_bot(self):
-        payload = {"profiles": [
-            {"username": "a", "follower_count": 10000, "following_count": 500, "posts_count": 50},
-            {"username": "b", "follower_count": 1000000, "following_count": 500, "posts_count": 2},
-        ]}
-        resp = self.client.post("/predict/bot", json=payload)
-        assert resp.status_code == 200
-        data = resp.json()
-        assert len(data["bot_probabilities"]) == 2
-        assert all(r in {"low", "medium", "high"} for r in data["risk_labels"])
 
-    def test_predict_growth(self):
-        history = [{"date": f"2024-01-{i+1:02d}", "follower_count": 1000 + i * 50} for i in range(10)]
-        payload = {"username": "testuser", "horizon": 30, "history": history}
-        resp = self.client.post("/predict/growth", json=payload)
-        assert resp.status_code == 200
-        data = resp.json()
-        assert len(data["dates"])       == 2
-        assert len(data["predicted"])   == 2
-        assert len(data["lower_bound"]) == 2
+def test_predict_growth(mock_app_client):
+    history = [{"date": f"2024-01-{i+1:02d}", "follower_count": 1000 + i * 50} for i in range(10)]
+    payload = {"username": "testuser", "horizon": 30, "history": history}
+    resp = mock_app_client.post("/predict/growth", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["dates"])       == 2
+    assert len(data["predicted"])   == 2
+    assert len(data["lower_bound"]) == 2
 
-    def test_predict_growth_too_short(self):
-        history = [{"date": "2024-01-01", "follower_count": 1000}]
-        resp    = self.client.post("/predict/growth", json={"username": "x", "horizon": 30, "history": history})
-        assert resp.status_code == 422
 
-    def test_predict_niche(self):
-        payload = {"profiles": [
-            {"username": "fitguy", "bio": "workout gym athlete fitness", "captions": "leg day"},
-            {"username": "foodie", "bio": "chef cooking recipe", "captions": "delicious meal"},
-        ]}
-        resp = self.client.post("/predict/niche", json=payload)
-        assert resp.status_code == 200
-        data = resp.json()
-        assert len(data["niches"])      == 2
-        assert len(data["confidences"]) == 2
+def test_predict_growth_too_short(mock_app_client):
+    history = [{"date": "2024-01-01", "follower_count": 1000}]
+    resp = mock_app_client.post("/predict/growth", json={"username": "x", "horizon": 30, "history": history})
+    assert resp.status_code == 422
+
+
+def test_predict_niche(mock_app_client):
+    payload = {"profiles": [
+        {"username": "fitguy", "bio": "workout gym", "captions": "leg day"},
+        {"username": "foodie", "bio": "chef recipe", "captions": "delicious meal"},
+    ]}
+    resp = mock_app_client.post("/predict/niche", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["niches"])      == 2
+    assert len(data["confidences"]) == 2
