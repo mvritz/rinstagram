@@ -281,9 +281,11 @@ rinstagram/
 
 ## Running Tests
 
+Run both suites from the repository root:
+
 ```bash
 # R tests
-Rscript -e "testthat::test_package('rinstagram')"
+Rscript -e "testthat::test_local()"
 
 # Python — unified service (encryption + ML)
 pytest services/ml/tests/ -v
