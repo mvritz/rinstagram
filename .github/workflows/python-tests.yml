@@ -11,6 +11,9 @@ jobs:
   test:
     name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -39,12 +42,13 @@ jobs:
         env:
           PYTHONPATH: .
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         if: matrix.python-version == '3.11'
         with:
           files: coverage.xml
           flags: python
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
+          fail_ci_if_error: false
 
   docker-build:
     name: Docker Build

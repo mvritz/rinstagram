@@ -14,7 +14,7 @@
     <img src="https://github.com/mvritz/rinstagram/actions/workflows/python-tests.yml/badge.svg" alt="Python CI">
   </a>
   <a href="https://codecov.io/gh/mvritz/rinstagram">
-    <img src="https://codecov.io/gh/mvritz/rinstagram/branch/main/graph/badge.svg" alt="Coverage">
+    <img src="https://codecov.io/gh/mvritz/rinstagram/branch/master/graph/badge.svg" alt="Coverage">
   </a>
   <a href="https://github.com/mvritz/rinstagram/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/mvritz/rinstagram?color=purple" alt="License">
