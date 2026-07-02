@@ -76,10 +76,11 @@ def generate_bot_data(n: int = 10000) -> Tuple[np.ndarray, np.ndarray]:
 
     def make_bot(k):
         log_fc  = rng.uniform(8, 20, k)
-        log_fwc = rng.choice([
+        log_fwc = np.where(
+            rng.random(k) < 0.5,
             rng.uniform(8, 20, k),
             rng.uniform(2,  5, k),
-        ])[0]
+        )
         log_pc  = rng.uniform(0, 4, k)
         ff      = np.clip(np.exp(log_fc - log_fwc) / 1000.0, 0, 1)
         er      = rng.uniform(0, 0.002, k)
