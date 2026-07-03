@@ -17,7 +17,7 @@
     <img src="https://codecov.io/gh/mvritz/rinstagram/branch/master/graph/badge.svg" alt="Coverage">
   </a>
   <a href="https://github.com/mvritz/rinstagram/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/mvritz/rinstagram?color=purple" alt="License">
+    <img src="https://img.shields.io/github/license/mvritz/rinstagram?style=flat&color=purple" alt="License">
   </a>
   <img src="https://img.shields.io/badge/version-2.0.0-purple" alt="Version">
 </p>
